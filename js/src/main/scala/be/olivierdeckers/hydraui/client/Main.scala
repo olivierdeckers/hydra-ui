@@ -12,7 +12,6 @@ import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 //TODO source mapping
-//TODO auto reload
 
 @JSExportTopLevel("Main")
 object Main {

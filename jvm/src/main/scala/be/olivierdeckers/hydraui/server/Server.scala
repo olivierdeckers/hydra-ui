@@ -28,6 +28,7 @@ object Server extends Api {
       <head>
         <title>Hydra UI</title>
         <script type="text/javascript" src="/client-fastopt.js"></script>
+        <script type="text/javascript" src="//localhost:12345/workbench.js"></script>
         <link rel="stylesheet" type="text/css" href="META-INF/resources/webjars/materialize-css/1.0.0-beta/dist/css/materialize.min.css"/>
       </head>
       <body>

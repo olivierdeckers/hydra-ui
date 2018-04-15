@@ -1,5 +1,7 @@
 import sbt.addCompilerPlugin
 
+enablePlugins(WorkbenchPlugin)
+
 lazy val root = crossProject
   .in(file("."))
   .settings(
