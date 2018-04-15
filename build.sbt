@@ -16,7 +16,8 @@ lazy val root = crossProject
     name := "client",
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scalajs-dom" % "0.9.5",
-      "com.thoughtworks.binding" %%% "dom" % "11.0.1"
+      "com.thoughtworks.binding" %%% "dom" % "11.0.1",
+      "com.thoughtworks.binding" %%% "route" % "11.0.1",
     ),
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
   )

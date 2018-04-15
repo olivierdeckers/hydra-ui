@@ -4,7 +4,7 @@ import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.Node
 
 
-object Policies extends MainContainer {
+object PoliciesComponent extends MainContainer {
 
   @dom
   def content: Binding[Node] = {
@@ -13,7 +13,7 @@ object Policies extends MainContainer {
 
 }
 
-object Policies2 extends MainContainer {
+object TestComponent extends MainContainer {
 
   @dom
   def content: Binding[Node] = {

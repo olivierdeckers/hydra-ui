@@ -5,7 +5,7 @@ import com.thoughtworks.binding.Binding.Vars
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.Node
 
-object ClientList extends MainContainer {
+object ClientListComponent extends MainContainer {
 
   val clients: Vars[Client] = Vars.apply[Client]()
 
