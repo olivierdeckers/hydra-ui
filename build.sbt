@@ -1,6 +1,8 @@
+import com.lihaoyi.workbench.WorkbenchBasePlugin.autoImport.WorkbenchStartModes.Manual
 import sbt.addCompilerPlugin
 
 enablePlugins(WorkbenchPlugin)
+workbenchStartMode := Manual
 
 lazy val root = crossProject
   .in(file("."))
@@ -39,5 +41,9 @@ val hydraUIJVM = root.jvm.settings(
   (resources in Compile) += {
     (fastOptJS in(hydraUIJS, Compile)).value
     (artifactPath in(hydraUIJS, Compile, fastOptJS)).value
+  },
+  (resources in Compile) += {
+    val js = (fastOptJS in (hydraUIJS, Compile)).value.data
+    js.getParentFile / (js.getName + ".map")
   }
 )
