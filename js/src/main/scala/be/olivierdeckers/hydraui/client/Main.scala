@@ -52,6 +52,7 @@ object Main {
     route.watch()
     dom.render(org.scalajs.dom.document.body, root())
     Client[Api].getClients().call().map(clients.value ++= _.values)
+    Client[Api].getPolicies().call().map(PoliciesComponent.policies.value ++= _)
   }
 
 }

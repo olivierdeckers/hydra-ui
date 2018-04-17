@@ -1,5 +1,6 @@
 package be.olivierdeckers.hydraui
 
+import ujson.Js
 import upickle.default.{ReadWriter, macroRW}
 
 case class HydraTokenResponse(access_token: String)
@@ -18,6 +19,21 @@ case class Client(
   scope: String,
   public: Boolean
 )
+
 object Client {
   implicit def rw: ReadWriter[Client] = macroRW
+}
+
+case class Policy(
+  id: String,
+  description: String,
+  subjects: Seq[String],
+  effect: String,
+  resources: Seq[String],
+  actions: Seq[String],
+  conditions: Js.Obj
+)
+
+object Policy {
+  implicit def rw: ReadWriter[Policy] = macroRW
 }

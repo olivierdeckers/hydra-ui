@@ -1,9 +1,6 @@
 package be.olivierdeckers.hydraui.server
 
-import java.util.UUID
-
-import akka.actor.ActorSystem
-import be.olivierdeckers.hydraui.{Client, HydraTokenResponse}
+import be.olivierdeckers.hydraui.{Client, HydraTokenResponse, Policy}
 import com.softwaremill.sttp._
 import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
 import ujson.JsonProcessingException
@@ -30,29 +27,42 @@ class HydraClient() {
 
   def getClients()(implicit token: AuthorizationToken): Future[Map[String, Client]] =
     sttp.get(uri"$baseUrl/clients")
-    .header("authorization", s"bearer ${token.token}")
-    .send
-    .map(response =>
-      read[Map[String, Client]](
-        response.body
-          .getOrElse(throw new RuntimeException(s"Error while fetching results: ${response.body.left.get}"))
-      )
-    ).recover {
+      .header("authorization", s"bearer ${token.token}")
+      .send
+      .map(response =>
+        read[Map[String, Client]](
+          response.body
+            .getOrElse(throw new RuntimeException(s"Error while fetching results: ${response.body.left.get}"))
+        )
+      ).recover {
       case e: JsonProcessingException =>
         e.printStackTrace()
         Map.empty
     }
 
+  def getPolicies()(implicit token: AuthorizationToken): Future[Seq[Policy]] =
+    sttp.get(uri"$baseUrl/policies")
+      .header("authorization", s"Bearer ${token.token}")
+      .send
+      .map(response =>
+        read[Seq[Policy]](response.body.getOrElse(throw new RuntimeException(s"Error while fetching results: ${response.body.left.get}")))
+      )
+      .recover {
+        case e: JsonProcessingException =>
+          e.printStackTrace()
+          Seq()
+      }
+
 }
 
 object HydraClient {
   def main(args: Array[String]): Unit = {
-//    new HydraClient().getAccessToken().foreach(println(_))
-    implicit val token = AuthorizationToken("c_hwqx6YcoIiwkgAUXrbhMneL3ky_IaOXMWsU4SsoYg.RQv4x7D92bj5UTyr-F_q9AY6gmiYoz9JqK8-HusUXLM")
-    new HydraClient().getClients()
-      .recover {
-        case ex: Throwable => ex.printStackTrace; Map.empty
-      }
-      .foreach(_.values.seq.foreach(println(_)))
+    //    new HydraClient().getAccessToken().foreach(println(_))
+    implicit val token = AuthorizationToken("a1VLTY8za43IXRnXK2_0ChPgcLZQRsFg3XLNwUygG0E.LNH8f9qMRlREWeUoPV65MuhcxXMMiDlH837pAkbEmDY")
+    new HydraClient().getPolicies()
+    //          .recover {
+    //            case ex: Throwable => ex.printStackTrace; Map.empty
+    //          }
+    //          .foreach(_.values.seq.foreach(println(_)))
   }
 }

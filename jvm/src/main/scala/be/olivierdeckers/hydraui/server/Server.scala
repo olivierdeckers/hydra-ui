@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import be.olivierdeckers.hydraui.{Api, Client}
+import be.olivierdeckers.hydraui.{Api, Client, Policy}
 import upickle.Js
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -75,9 +75,13 @@ object Server extends Api {
     }
 
     Http().bindAndHandle(route, "0.0.0.0", port = 8080)
+    println("Started server on port 8080")
   }
 
-  override def getClients(): Future[Map[String, Client]] = {
-    hydraClient.getClients()(AuthorizationToken("c_hwqx6YcoIiwkgAUXrbhMneL3ky_IaOXMWsU4SsoYg.RQv4x7D92bj5UTyr-F_q9AY6gmiYoz9JqK8-HusUXLM"))
-  }
+  implicit val token = AuthorizationToken("a1VLTY8za43IXRnXK2_0ChPgcLZQRsFg3XLNwUygG0E.LNH8f9qMRlREWeUoPV65MuhcxXMMiDlH837pAkbEmDY")
+  override def getClients(): Future[Map[String, Client]] =
+    hydraClient.getClients()
+
+  override def getPolicies(): Future[Seq[Policy]] =
+    hydraClient.getPolicies()
 }
