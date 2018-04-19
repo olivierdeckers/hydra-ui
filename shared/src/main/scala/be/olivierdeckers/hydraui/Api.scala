@@ -3,7 +3,7 @@ package be.olivierdeckers.hydraui
 import scala.concurrent.Future
 
 trait Api {
-  def getClients(): Future[Map[String, Client]]
+  def getClients(): Future[Either[String,Map[String, Client]]]
 
-  def getPolicies(): Future[Seq[Policy]]
+  def getPolicies(): Future[Either[String,Seq[Policy]]]
 }

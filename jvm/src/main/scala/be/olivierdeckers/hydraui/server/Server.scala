@@ -78,10 +78,9 @@ object Server extends Api {
     println("Started server on port 8080")
   }
 
-  implicit val token = AuthorizationToken("a1VLTY8za43IXRnXK2_0ChPgcLZQRsFg3XLNwUygG0E.LNH8f9qMRlREWeUoPV65MuhcxXMMiDlH837pAkbEmDY")
-  override def getClients(): Future[Map[String, Client]] =
+  override def getClients(): Future[Either[String, Map[String, Client]]] =
     hydraClient.getClients()
 
-  override def getPolicies(): Future[Seq[Policy]] =
+  override def getPolicies(): Future[Either[String, Seq[Policy]]] =
     hydraClient.getPolicies()
 }

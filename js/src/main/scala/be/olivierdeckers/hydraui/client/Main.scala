@@ -51,8 +51,16 @@ object Main {
   def main(): Unit = {
     route.watch()
     dom.render(org.scalajs.dom.document.body, root())
-    Client[Api].getClients().call().map(clients.value ++= _.values)
-    Client[Api].getPolicies().call().map(PoliciesComponent.policies.value ++= _)
+
+    Client[Api].getClients().call().map {
+      case Right(clientMap) => clients.value ++= clientMap.values
+      case Left(error) => println(s"Error while fetching clients: $error")
+    }
+
+    Client[Api].getPolicies().call().map {
+      case Right(policyList) => PoliciesComponent.policies.value ++= policyList
+      case Left(error) => println(s"Error while fetching policies: $error")
+    }
   }
 
 }

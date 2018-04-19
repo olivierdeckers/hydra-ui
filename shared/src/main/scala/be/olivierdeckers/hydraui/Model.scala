@@ -3,7 +3,7 @@ package be.olivierdeckers.hydraui
 import ujson.Js
 import upickle.default.{ReadWriter, macroRW}
 
-case class HydraTokenResponse(access_token: String)
+case class HydraTokenResponse(access_token: String, expires_in: Int)
 object HydraTokenResponse {
   implicit def rw: ReadWriter[HydraTokenResponse] = macroRW
 }
