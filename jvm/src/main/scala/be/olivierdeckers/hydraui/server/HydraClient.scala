@@ -43,16 +43,16 @@ trait WithHydraAccessToken {
   }
 
   def withAccessToken[R](block: AccessToken => Future[R]): Future[Either[String, R]] =
-    accessToken().flatMap(_ match {
+    accessToken().flatMap {
       case Right(token) => block(token).map(Right(_))
       case Left(error) => Future.successful(Left(error))
-    })
+    }
 }
 
 class HydraClient() extends WithHydraAccessToken {
 
   implicit val backend: SttpBackend[Future, Nothing] = AkkaHttpBackend()
-  override val clock = Clock.systemUTC()
+  override val clock: Clock = Clock.systemUTC()
   override val clientCredentials: String = "cm9tY29yZTo3OTNiOWE1Zjc1ZGU4ZWRmMDljNDNhYWFlMDJkODk1NDMzMGY5YmI1NDgwMWM1ZTc1YmU0ZTVkMTg0NDdiNjZj"
 
   import HydraClient.baseUrl
