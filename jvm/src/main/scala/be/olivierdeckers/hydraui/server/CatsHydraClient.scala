@@ -52,7 +52,10 @@ object CatsHydraClient {
     if (token.expiresAt <= clock.millis) {
       for {
         newToken <- getAccessToken.map(_.map(r => AccessToken(r.access_token, clock.millis + r.expires_in)))
-        result <- EitherT.fromEither[IO](newToken).flatMap(t => EitherT(performCallWithToken(t))).value
+        result <- newToken match {
+          case Right(t) => performCallWithToken(t)
+          case Left(e) => IO.pure(Left(e))
+        }
       } yield (newToken.getOrElse(AccessToken.empty), result)
     } else {
       performCallWithToken(token).map(token -> _)
