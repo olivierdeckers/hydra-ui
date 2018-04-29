@@ -42,6 +42,7 @@ lazy val root = crossProject
       "org.http4s" %% "http4s-circe" % http4sVersion,
       "io.circe" %% "circe-generic" % "0.9.3",
       "org.slf4j" % "slf4j-simple" % "1.6.2",
+      "com.lihaoyi" %% "ujson-circe" % "0.6.5",
     )
   )
 

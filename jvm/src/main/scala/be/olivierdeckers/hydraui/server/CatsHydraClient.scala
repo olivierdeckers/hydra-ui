@@ -5,7 +5,7 @@ import java.time.Clock
 import be.olivierdeckers.hydraui.{Client, HydraTokenResponse, Policy}
 import cats.data.StateT
 import cats.effect.IO
-import fs2.Stream
+import io.circe.HCursor
 import io.circe.generic.auto._
 import org.http4s.Http4s._
 import org.http4s.Method._
@@ -15,13 +15,15 @@ import org.http4s.client.dsl.io._
 import org.http4s.{EntityDecoder, Header, Request, _}
 import org.slf4j.{Logger, LoggerFactory}
 import pureconfig.loadConfigOrThrow
+import ujson.Js
+import ujson.circe.CirceJson
 
 object CatsHydraClient {
 
   case class HydraClientConfig(credentials: String)
   val config: HydraClientConfig = loadConfigOrThrow[HydraClientConfig]("hydra.client")
 
-  val httpClient: Stream[IO, client.Client[IO]] = Http1Client.stream[IO]()
+  val httpClient: IO[client.Client[IO]] = Http1Client.apply[IO]()
   val clock: Clock = Clock.systemUTC()
   val logger: Logger = LoggerFactory.getLogger(CatsHydraClient.getClass)
 
@@ -42,12 +44,12 @@ object CatsHydraClient {
           e.left.foreach(ex => logger.error(s"Error while calling hydra API with request $request: $ex"))
           e
         })
-        Stream.eval(attempt)
-      }.compile.last.map(_.get)
+        attempt
+      }
 
     if (token.expiresAt <= clock.millis) {
       for {
-        newToken <- getAccessToken.compile.last.map(_.get).map(r => AccessToken(r.access_token, clock.millis + r.expires_in))
+        newToken <- getAccessToken.map(r => AccessToken(r.access_token, clock.millis + r.expires_in))
         result <- performCallWithToken(newToken)
       } yield (newToken, result)
     } else {
@@ -58,10 +60,12 @@ object CatsHydraClient {
   implicit val hydraTokenResponseDecoder: EntityDecoder[IO, HydraTokenResponse] = jsonOf[IO, HydraTokenResponse]
   implicit val clientMapDecoder: EntityDecoder[IO, Map[String, Client]] = jsonOf[IO, Map[String, Client]]
   implicit val policyDecode: EntityDecoder[IO, Seq[Policy]] = jsonOf[IO, Seq[Policy]]
+  implicit val objDecoder: io.circe.Decoder[Js.Obj] =
+    (c: HCursor) => Right(CirceJson.transform(c.value, upickle.default.readwriter[Js.Obj]))
 
   val baseUrl: Uri = uri("https://oauth.staging1.romcore.cloud")
 
-  def getAccessToken: Stream[IO, HydraTokenResponse] = httpClient.flatMap { client =>
+  def getAccessToken: IO[HydraTokenResponse] = httpClient.flatMap { client =>
     val request = POST(
       baseUrl / "oauth2" / "token",
       "grant_type=client_credentials&scope=hydra",
@@ -69,7 +73,7 @@ object CatsHydraClient {
       Header("Content-Type", "application/x-www-form-urlencoded")
     )
 
-    Stream.eval(client.expect[HydraTokenResponse](request))
+    client.expect[HydraTokenResponse](request)
   }
 
   def getClients(): StateT[IO, AccessToken, Either[Throwable, Map[String, Client]]] =
@@ -82,10 +86,10 @@ object CatsHydraClient {
       GET(baseUrl / "policies")
     )
 
-  def main(args: Array[String]): Unit = {
-    val result = getClients().run(AccessToken.empty).unsafeRunSync()
-    //    val result = getAccessToken.compile.last.unsafeRunSync()
-    println(result)
-  }
+//  def main(args: Array[String]): Unit = {
+//    val result = getClients().run(AccessToken.empty).unsafeRunSync()
+//    //    val result = getAccessToken.compile.last.unsafeRunSync()
+//    println(result)
+//  }
 
 }

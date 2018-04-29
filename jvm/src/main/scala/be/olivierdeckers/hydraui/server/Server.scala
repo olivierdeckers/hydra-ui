@@ -21,7 +21,7 @@ object AutowireServer extends autowire.Server[Js.Value, Reader, Writer] {
 
 object Server extends Api {
 
-  val hydraClient = new HydraClient()
+//  val hydraClient = new HydraClient()
 
   def index(): Elem = {
     <html>
@@ -78,9 +78,18 @@ object Server extends Api {
     println("Started server on port 8080")
   }
 
+  var token: CatsHydraClient.AccessToken = CatsHydraClient.AccessToken.empty
   override def getClients(): Future[Either[String, Map[String, Client]]] =
-    hydraClient.getClients()
+    CatsHydraClient.getClients().run(token).unsafeToFuture().map {
+      case (newToken, response) =>
+        token = newToken
+        response.left.map(_.getMessage)
+    }
 
   override def getPolicies(): Future[Either[String, Seq[Policy]]] =
-    hydraClient.getPolicies()
+    CatsHydraClient.getPolicies().run(token).unsafeToFuture().map {
+      case (newToken, response) =>
+        token = newToken
+        response.left.map(_.getMessage)
+    }
 }
