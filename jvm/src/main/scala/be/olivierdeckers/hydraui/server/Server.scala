@@ -78,6 +78,7 @@ object Server extends Api {
     println("Started server on port 8080")
   }
 
+  // TODO more elegant way to keep track of the latest access token without requiring mutation
   var token: CatsHydraClient.AccessToken = CatsHydraClient.AccessToken.empty
   override def getClients(): Future[Either[String, Map[String, Client]]] =
     CatsHydraClient.getClients().run(token).unsafeToFuture().map {
