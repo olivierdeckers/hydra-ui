@@ -11,8 +11,6 @@ import org.scalajs.dom.window
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
-//TODO source mapping
-
 @JSExportTopLevel("Main")
 object Main {
 

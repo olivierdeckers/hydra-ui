@@ -1,25 +1,20 @@
-package be.olivierdeckers.hydraui.server
+package be.olivierdeckers.hydraui.server.hydraclient
 
 import java.time.Clock
 
-import be.olivierdeckers.hydraui.server.hydraclient.AccessToken
-import be.olivierdeckers.hydraui.{Client, HydraTokenResponse, Policy}
+import be.olivierdeckers.hydraui.HydraTokenResponse
 import cats.data.StateT
-import cats.effect.{IO, Sync}
-import io.circe.HCursor
+import cats.effect.IO
 import io.circe.generic.auto._
 import org.http4s.Http4s._
 import org.http4s.Method._
 import org.http4s.circe._
-import org.http4s.client.blaze._
+import org.http4s.{EntityDecoder, Header, Request, client}
+import org.http4s.client.blaze.Http1Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.client.dsl.io._
-import org.http4s.{EntityDecoder, Header, Request, _}
 import org.slf4j.{Logger, LoggerFactory}
-import ujson.Js
-import ujson.circe.CirceJson
 
-trait HttpClient[F[_]] {
+trait HydraClient[F[_]] {
 
   def apiCall[A](request: F[Request[F]])(implicit ed: EntityDecoder[F,A]): F[Either[Throwable, A]]
 
@@ -27,11 +22,11 @@ trait HttpClient[F[_]] {
 
 }
 
-object Http4sHttpClient extends HttpClient[IO] {
+object Http4sHydraClient extends HydraClient[IO] with Http4sClientDsl[IO]  {
   import be.olivierdeckers.hydraui.server.config.HydraClientConfig.config._
   val httpClient: IO[client.Client[IO]] = Http1Client.apply[IO]()
   val clock: Clock = Clock.systemUTC()
-  val logger: Logger = LoggerFactory.getLogger(Http4sHttpClient.getClass)
+  val logger: Logger = LoggerFactory.getLogger(Http4sHydraClient.getClass)
 
   override def apiCall[A](request: IO[Request[IO]])(implicit ed: EntityDecoder[IO, A]): IO[Either[Throwable, A]] =
     httpClient.flatMap { client =>
@@ -69,34 +64,4 @@ object Http4sHttpClient extends HttpClient[IO] {
       Header("Authorization", s"Basic $credentials"),
       Header("Content-Type", "application/x-www-form-urlencoded")
     ))
-}
-
-class CatsHydraClient[F[_]: Sync](client: HttpClient[F]) extends Http4sClientDsl[F] {
-
-  import be.olivierdeckers.hydraui.server.config.HydraClientConfig.config._
-
-  implicit val clientMapDecoder: EntityDecoder[F, Map[String, Client]] = jsonOf[F, Map[String, Client]]
-  implicit val policyDecoder: EntityDecoder[F, Seq[Policy]] = jsonOf[F, Seq[Policy]]
-  implicit val objDecoder: io.circe.Decoder[Js.Obj] =
-    (c: HCursor) => Right(CirceJson.transform(c.value, upickle.default.readwriter[Js.Obj]))
-
-  def getClients: StateT[F, AccessToken, Either[Throwable, Map[String, Client]]] =
-    client.securedApiCall[Map[String, Client]](
-      GET.apply(baseUri / "clients")
-    )
-
-  def getPolicies: StateT[F, AccessToken, Either[Throwable, Seq[Policy]]] =
-    client.securedApiCall[Seq[Policy]](
-      GET(baseUri / "policies")
-    )
-
-}
-
-object CatsHydraClient {
-  def main(args: Array[String]): Unit = {
-    val client = new CatsHydraClient(Http4sHttpClient)
-    val result = client.getClients.run(AccessToken.empty).unsafeRunSync()
-    //    val result = getAccessToken.compile.last.unsafeRunSync()
-    println(result)
-  }
 }

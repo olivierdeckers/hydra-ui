@@ -6,7 +6,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import be.olivierdeckers.hydraui.server.hydraclient.AccessToken
+import be.olivierdeckers.hydraui.server.hydraclient.{AccessToken, Http4sHydraClient, HydraApiClient}
 import be.olivierdeckers.hydraui.{Api, Client, Policy}
 import cats.effect.IO
 import upickle.Js
@@ -80,7 +80,7 @@ object Server extends Api {
     println("Started server on port 8080")
   }
 
-  val client = new CatsHydraClient[IO](Http4sHttpClient)
+  val client = new HydraApiClient[IO](Http4sHydraClient)
   // TODO testability is not good, since IO is opaque
   var token: AccessToken = AccessToken.empty
   override def getClients(): Future[Either[String, Map[String, Client]]] =
