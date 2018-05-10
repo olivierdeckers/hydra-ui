@@ -15,7 +15,7 @@ lazy val root = crossProject
     libraryDependencies ++= Seq(
       "com.lihaoyi" %%% "upickle" % "0.6.5",
       "com.lihaoyi" %%% "autowire" % "0.2.6",
-      "com.lihaoyi" %%% "utest" % "0.6.3",
+      "com.lihaoyi" %%% "utest" % "0.6.3" % Test,
       "org.typelevel" %%% "cats-core" % "1.1.0",
     ),
     scalacOptions += "-Ypartial-unification"
