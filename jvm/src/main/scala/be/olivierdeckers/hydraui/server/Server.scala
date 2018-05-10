@@ -6,7 +6,9 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import be.olivierdeckers.hydraui.server.hydraclient.AccessToken
 import be.olivierdeckers.hydraui.{Api, Client, Policy}
+import cats.effect.IO
 import upickle.Js
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -78,17 +80,18 @@ object Server extends Api {
     println("Started server on port 8080")
   }
 
-  // TODO more elegant way to keep track of the latest access token without requiring mutation
-  var token: CatsHydraClient.AccessToken = CatsHydraClient.AccessToken.empty
+  val client = new CatsHydraClient[IO](Http4sHttpClient)
+  // TODO testability is not good, since IO is opaque
+  var token: AccessToken = AccessToken.empty
   override def getClients(): Future[Either[String, Map[String, Client]]] =
-    CatsHydraClient.getClients().run(token).unsafeToFuture().map {
+    client.getClients.run(token).unsafeToFuture().map {
       case (newToken, response) =>
         token = newToken
         response.left.map(_.getMessage)
     }
 
   override def getPolicies(): Future[Either[String, Seq[Policy]]] =
-    CatsHydraClient.getPolicies().run(token).unsafeToFuture().map {
+    client.getPolicies.run(token).unsafeToFuture().map {
       case (newToken, response) =>
         token = newToken
         response.left.map(_.getMessage)

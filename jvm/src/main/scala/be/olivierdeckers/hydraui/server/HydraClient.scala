@@ -11,14 +11,14 @@ import upickle.default._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class AccessToken(token: String) extends AnyVal
+case class HydraAccessToken(token: String) extends AnyVal
 
 trait WithHydraAccessToken {
   implicit val backend: SttpBackend[Future, Nothing]
   val clientCredentials: String
   val clock: Clock
 
-  val accessToken: (() => Future[Either[String, AccessToken]]) = {
+  val accessToken: (() => Future[Either[String, HydraAccessToken]]) = {
     case class TokenState(expiresAt: Long, token: String)
     var token = Option.empty[TokenState]
 
@@ -33,16 +33,16 @@ trait WithHydraAccessToken {
     () =>
       token match {
         case Some(response) if response.expiresAt > clock.millis =>
-          Future.successful(Right(AccessToken(response.token)))
+          Future.successful(Right(HydraAccessToken(response.token)))
         case _ =>
           getAccessToken().map(_.right.map { response =>
             token = Some(TokenState(clock.millis + response.expires_in * 1000 - 1000, response.access_token))
-            AccessToken(response.access_token)
+            HydraAccessToken(response.access_token)
           })
       }
   }
 
-  def withAccessToken[R](block: AccessToken => Future[R]): Future[Either[String, R]] =
+  def withAccessToken[R](block: HydraAccessToken => Future[R]): Future[Either[String, R]] =
     accessToken().flatMap {
       case Right(token) => block(token).map(Right(_))
       case Left(error) => Future.successful(Left(error))
@@ -95,7 +95,7 @@ object HydraClient {
 
   def main(args: Array[String]): Unit = {
     //    new HydraClient().getAccessToken().foreach(println(_))
-    implicit val token = AccessToken("a1VLTY8za43IXRnXK2_0ChPgcLZQRsFg3XLNwUygG0E.LNH8f9qMRlREWeUoPV65MuhcxXMMiDlH837pAkbEmDY")
+    implicit val token = HydraAccessToken("a1VLTY8za43IXRnXK2_0ChPgcLZQRsFg3XLNwUygG0E.LNH8f9qMRlREWeUoPV65MuhcxXMMiDlH837pAkbEmDY")
     new HydraClient().getPolicies()
     //          .recover {
     //            case ex: Throwable => ex.printStackTrace; Map.empty

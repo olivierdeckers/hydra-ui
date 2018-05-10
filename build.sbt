@@ -9,7 +9,7 @@ val http4sVersion = "0.18.9"
 lazy val root = crossProject
   .in(file("."))
   .settings(
-    scalaVersion := "2.12.5",
+    scalaVersion := "2.12.4",
     organization := "be.olivierdeckers",
     version := "0.1-SNAPSHOT",
     libraryDependencies ++= Seq(
