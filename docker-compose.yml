@@ -1,0 +1,15 @@
+version: '2'
+services:
+  hydra:
+    image: repository.romcore.io:8443/romcore/hydra:v0.9.12-SNAPSHOT
+    ports:
+    - 4444:4444
+    entrypoint: "/go/bin/hydra host --dangerous-force-http"
+    environment:
+    - ACCESS_TOKEN_LIFESPAN=24h
+    - SYSTEM_SECRET=b7cd5056d8a10920335be04890b67560c3a02228c17a324fb5048a1686af188a
+    - DATABASE_URL=memory
+    - FORCE_ROOT_CLIENT_CREDENTIALS=root:root
+    - CONSENT_URL=http://localhost:9000/public/consent
+    - ISSUER=http://localhost:4444
+    - HTTPS_ALLOW_TERMINATION_FROM=0.0.0.0/0

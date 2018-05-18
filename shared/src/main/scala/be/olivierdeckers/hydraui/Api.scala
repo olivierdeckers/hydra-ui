@@ -6,4 +6,6 @@ trait Api {
   def getClients(): Future[Either[String,Map[String, Client]]]
 
   def getPolicies(): Future[Either[String,Seq[Policy]]]
+
+  def createClient(client: Client): Future[Either[String, Client]]
 }

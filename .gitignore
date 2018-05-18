@@ -1,2 +1,5 @@
 .idea
 target
+.bloop
+.ensime_cache
+.ensime

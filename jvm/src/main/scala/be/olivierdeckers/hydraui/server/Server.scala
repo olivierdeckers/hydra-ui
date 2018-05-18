@@ -96,4 +96,11 @@ object Server extends Api {
         token = newToken
         response.left.map(_.getMessage)
     }
+
+  override def createClient(body: Client): Future[Either[String, Client]] =
+    client.createClient(body).run(token).unsafeToFuture().map {
+      case (newToken, response) =>
+        token = newToken
+        response.left.map(_.getMessage)
+    }
 }

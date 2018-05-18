@@ -50,12 +50,13 @@ object Main {
     route.watch()
     dom.render(org.scalajs.dom.document.body, root())
 
-    Client[Api].getClients().call().map {
+    val client = Client[Api]
+    client.getClients().call().map {
       case Right(clientMap) => clients.value ++= clientMap.values
       case Left(error) => println(s"Error while fetching clients: $error")
     }
 
-    Client[Api].getPolicies().call().map {
+    client.getPolicies().call().map {
       case Right(policyList) => PoliciesComponent.policies.value ++= policyList
       case Left(error) => println(s"Error while fetching policies: $error")
     }
