@@ -18,7 +18,8 @@ lazy val root = crossProject
       "com.lihaoyi" %%% "utest" % "0.6.3" % Test,
       "org.typelevel" %%% "cats-core" % "1.1.0",
     ),
-    scalacOptions += "-Ypartial-unification"
+    scalacOptions += "-Ypartial-unification",
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
   .jsSettings(
     name := "client",
