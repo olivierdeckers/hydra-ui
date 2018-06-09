@@ -2,10 +2,12 @@ package be.olivierdeckers.hydraui.client
 
 import java.util.UUID
 
+import be.olivierdeckers.hydraui.GrantType.AuthorizationCode
 import be.olivierdeckers.hydraui.client.components._
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.{MouseEvent, Node}
-import be.olivierdeckers.hydraui.{Client => HydraClient}
+import be.olivierdeckers.hydraui.{Api, GrantType, ResponseType, Client => HydraClient}
+import cats.data.Validated.{Invalid, Valid}
 
 object CreateClientComponent extends MainContainer {
 
@@ -18,23 +20,35 @@ object CreateClientComponent extends MainContainer {
     val urlField = new InputField("url")
     val ownerField = new InputField("owner")
     val redirectUriField = new InputField("redirect-uri")
-    val responseTypesField = new MultiSelectField("response-types", Seq("code", "token", "id_token"))
-    val grantTypesField = new MultiSelectField("grant-types", Seq("autorization_code", "implicit", "client_credentials", "refresh_token"))
+    val responseTypesField = new MultiSelectField("response-types", ResponseType.all.map(_.value))
+    val grantTypesField = new MultiSelectField("grant-types", GrantType.all.map(_.value))
     val scopeField = new InputField("scope")
     val publicField = new SwitchField("public")
 
     def onClickSubmit = { evt: MouseEvent =>
-      val client = HydraClient(
+      val client = HydraClient.validate(
         UUID.randomUUID().toString,
         nameField.value,
         urlField.value,
         ownerField.value,
         redirectUriField.value.split(','),
-        responseTypesField.value,
-        grantTypesField.value,
+        responseTypesField.value.flatMap(ResponseType.fromString),
+        grantTypesField.value.flatMap(GrantType.fromString),
         scopeField.value,
         publicField.value
       )
+
+      import scalajs.concurrent.JSExecutionContext.Implicits.queue
+      import autowire._
+      client match {
+        case Valid(c) =>
+          Client[Api].createClient(c).call()
+            .map {
+              case Left(e) => println(e)
+              case _ => // do nothing
+            }
+        case Invalid(e) => println(e)
+      }
       println(client)
     }
 

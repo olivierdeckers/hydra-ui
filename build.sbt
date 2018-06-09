@@ -17,6 +17,9 @@ lazy val root = crossProject
       "com.lihaoyi" %%% "autowire" % "0.2.6",
       "com.lihaoyi" %%% "utest" % "0.6.3" % Test,
       "org.typelevel" %%% "cats-core" % "1.1.0",
+      "eu.timepit" %%% "refined" % "0.9.0",
+      "io.circe" %%% "circe-generic" % "0.9.3",
+      "io.circe" %%% "circe-refined" % "0.9.3",
     ),
     scalacOptions += "-Ypartial-unification",
     testFrameworks += new TestFramework("utest.runner.Framework")
@@ -41,7 +44,6 @@ lazy val root = crossProject
       "com.github.pureconfig" %% "pureconfig" % "0.9.1",
       "org.http4s" %% "http4s-blaze-client" % http4sVersion,
       "org.http4s" %% "http4s-circe" % http4sVersion,
-      "io.circe" %% "circe-generic" % "0.9.3",
       "org.slf4j" % "slf4j-simple" % "1.6.2",
       "com.lihaoyi" %% "ujson-circe" % "0.6.5",
     )
@@ -54,7 +56,7 @@ val hydraUIJVM = root.jvm.settings(
     (artifactPath in(hydraUIJS, Compile, fastOptJS)).value
   },
   (resources in Compile) += {
-    val js = (fastOptJS in (hydraUIJS, Compile)).value.data
+    val js = (fastOptJS in(hydraUIJS, Compile)).value.data
     js.getParentFile / (js.getName + ".map")
   }
 )

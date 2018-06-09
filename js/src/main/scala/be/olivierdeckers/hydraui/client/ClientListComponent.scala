@@ -1,13 +1,13 @@
 package be.olivierdeckers.hydraui.client
 
-import be.olivierdeckers.hydraui.Client
+import be.olivierdeckers.hydraui.{ Client => HydraClient }
 import com.thoughtworks.binding.Binding.Vars
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.Node
 
 object ClientListComponent extends MainContainer {
 
-  val clients: Vars[Client] = Vars.apply[Client]()
+  val clients: Vars[HydraClient] = Vars.apply[HydraClient]()
 
   @dom
   def content: Binding[Node] = {
@@ -22,10 +22,10 @@ object ClientListComponent extends MainContainer {
         {for (client <- clients) yield {
         <tr>
           <td>
-            {client.client_name}
+            {client.client_name.value}
           </td>
           <td>
-            {client.client_uri}
+            {client.client_uri.value}
           </td>
         </tr>
       }}

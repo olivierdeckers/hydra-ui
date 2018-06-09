@@ -2,11 +2,14 @@ package be.olivierdeckers.hydraui.server.hydraclient
 
 import java.util.UUID
 
-import be.olivierdeckers.hydraui.{Client, Policy}
+import be.olivierdeckers.hydraui.{Client, GrantType, Policy, ResponseType}
 import cats.data.StateT
 import cats.effect.Sync
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.NonEmpty
 import io.circe.HCursor
 import io.circe.generic.auto._
+import io.circe.refined._
 import org.http4s.Method._
 import org.http4s.circe._
 import org.http4s.client.dsl.Http4sClientDsl
@@ -44,8 +47,9 @@ class HydraApiClient[F[_] : Sync](client: HydraClient[F]) extends Http4sClientDs
 
 object HydraApiClient {
   def main(args: Array[String]): Unit = {
+    import eu.timepit.refined.auto._
     val client = new HydraApiClient(Http4sHydraClient)
-    client.createClient(Client(UUID.randomUUID.toString, "test", "", "", Seq(), Seq(), Seq(), "", true))
+    client.createClient(Client(Refined.unsafeApply(UUID.randomUUID.toString), "test", "", "", Seq(), Refined.unsafeApply(Seq(ResponseType.Token)), Refined.unsafeApply(Seq(GrantType.ClientCredentials)), "", true))
       .run(AccessToken.empty).unsafeRunSync()
     val result = client.getClients.run(AccessToken.empty).unsafeRunSync()
     //    val result = getAccessToken.compile.last.unsafeRunSync()
