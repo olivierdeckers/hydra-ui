@@ -15,15 +15,18 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 object Main {
 
   sealed class Page(val hash: String, val content: MainContainer)
+
   case object Clients extends Page("#clients", ClientListComponent)
+
   case object Policies extends Page("#policies", PoliciesComponent)
-  case object Test extends Page("#test", TestComponent)
+
+  case object CreateClient extends Page("#create", CreateClientComponent)
 
   val currentPage = Var(Clients)
 
   val route: Route.Hash[Page] = Route.Hash[Page](Clients)(new Route.Format[Page] {
     override def unapply(hashText: String): Option[Page] =
-      Seq(Clients, Policies, Test).find(_.hash == window.location.hash)
+      Seq(Clients, Policies, CreateClient).find(_.hash == window.location.hash)
 
     override def apply(state: Page): String = state.hash
   })
@@ -32,17 +35,27 @@ object Main {
   def root(): Binding[BindingSeq[Node]] = {
     <nav>
       <div class="nav-wrapper">
-        <a href="#" class="brand-logo">Hydra UI</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-          <li><a href="#clients">Clients</a></li>
-          <li><a href="#policies">Policies</a></li>
-          <li><a href="#test">test</a></li>
-        </ul>
+        <div class="row">
+          <div class="col s12">
+            <a href="#" class="brand-logo">Hydra UI</a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+              <li>
+                <a href="#clients">Clients</a>
+              </li>
+              <li>
+                <a href="#policies">Policies</a>
+              </li>
+              <li>
+                <a href="#create">Create client</a>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </nav>
-    <div>
-      { route.state.bind.content.content.bind }
-    </div>
+      <div>
+        {route.state.bind.content.content.bind}
+      </div>
   }
 
   @JSExport

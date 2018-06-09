@@ -45,7 +45,7 @@ class HydraApiClient[F[_] : Sync](client: HydraClient[F]) extends Http4sClientDs
 object HydraApiClient {
   def main(args: Array[String]): Unit = {
     val client = new HydraApiClient(Http4sHydraClient)
-    client.createClient(Client(UUID.randomUUID.toString, "test", "", "", None, None, Seq(), "", true))
+    client.createClient(Client(UUID.randomUUID.toString, "test", "", "", Seq(), Seq(), Seq(), "", true))
       .run(AccessToken.empty).unsafeRunSync()
     val result = client.getClients.run(AccessToken.empty).unsafeRunSync()
     //    val result = getAccessToken.compile.last.unsafeRunSync()

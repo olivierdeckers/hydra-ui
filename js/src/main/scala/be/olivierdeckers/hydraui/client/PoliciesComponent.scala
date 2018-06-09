@@ -55,11 +55,4 @@ object PoliciesComponent extends MainContainer {
 
 }
 
-object TestComponent extends MainContainer {
 
-  @dom
-  def content: Binding[Node] = {
-    <div>test2</div>
-  }
-
-}

@@ -13,8 +13,8 @@ case class Client(
   client_name: String,
   client_uri: String,
   owner: String,
-  redirect_uris: Option[Seq[String]],
-  response_types: Option[Seq[String]],
+  redirect_uris: Seq[String],
+  response_types: Seq[String],
   grant_types: Seq[String],
   scope: String,
   public: Boolean
