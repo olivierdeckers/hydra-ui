@@ -1,8 +1,6 @@
 import com.lihaoyi.workbench.WorkbenchBasePlugin.autoImport.WorkbenchStartModes.Manual
+import com.lihaoyi.workbench.WorkbenchBasePlugin.autoImport.workbenchStartMode
 import sbt.addCompilerPlugin
-
-enablePlugins(WorkbenchPlugin)
-workbenchStartMode := Manual
 
 val http4sVersion = "0.18.9"
 
@@ -22,7 +20,7 @@ lazy val root = crossProject
       "io.circe" %%% "circe-refined" % "0.9.3",
     ),
     scalacOptions += "-Ypartial-unification",
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    testFrameworks += new TestFramework("utest.runner.Framework"),
   )
   .jsSettings(
     name := "client",
@@ -31,7 +29,9 @@ lazy val root = crossProject
       "com.thoughtworks.binding" %%% "dom" % "11.0.1",
       "com.thoughtworks.binding" %%% "route" % "11.0.1",
     ),
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    workbenchStartMode := Manual,
+    workbenchDefaultRootObject := Some(("js/target/scala-2.12/classes/index.html", "js/target/scala-2.12/")),
   )
   .jvmSettings(
     name := "server",
@@ -49,14 +49,15 @@ lazy val root = crossProject
     )
   )
 
-val hydraUIJS = root.js
-val hydraUIJVM = root.jvm.settings(
-  (resources in Compile) += {
-    (fastOptJS in(hydraUIJS, Compile)).value
-    (artifactPath in(hydraUIJS, Compile, fastOptJS)).value
-  },
-  (resources in Compile) += {
-    val js = (fastOptJS in(hydraUIJS, Compile)).value.data
-    js.getParentFile / (js.getName + ".map")
-  }
-)
+val hydraUIJS = root.js.enablePlugins(WorkbenchPlugin)
+val hydraUIJVM = root.jvm
+//  .settings(
+//  (resources in Compile) += {
+//    (fastOptJS in(hydraUIJS, Compile)).value
+//    (artifactPath in(hydraUIJS, Compile, fastOptJS)).value
+//  },
+//  (resources in Compile) += {
+//    val js = (fastOptJS in(hydraUIJS, Compile)).value.data
+//    js.getParentFile / (js.getName + ".map")
+//  }
+//)

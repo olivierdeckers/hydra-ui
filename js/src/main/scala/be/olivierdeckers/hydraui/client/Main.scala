@@ -22,14 +22,14 @@ object Main {
 
   case object CreateClient extends Page("#create", CreateClientComponent)
 
-  val currentPage = Var(Clients)
-
-  val route: Route.Hash[Page] = Route.Hash[Page](Clients)(new Route.Format[Page] {
+  implicit val routeFormat: Route.Format[Page] = new Route.Format[Page] {
     override def unapply(hashText: String): Option[Page] =
       Seq(Clients, Policies, CreateClient).find(_.hash == window.location.hash)
 
     override def apply(state: Page): String = state.hash
-  })
+  }
+
+  val route: Route.Hash[Page] = Route.Hash[Page](Clients)(routeFormat)
 
   @dom
   def root(): Binding[BindingSeq[Node]] = {
@@ -60,6 +60,7 @@ object Main {
 
   @JSExport
   def main(): Unit = {
+    route.state.value = routeFormat.unapply(window.location.hash).getOrElse(Clients)
     route.watch()
     dom.render(org.scalajs.dom.document.body, root())
 

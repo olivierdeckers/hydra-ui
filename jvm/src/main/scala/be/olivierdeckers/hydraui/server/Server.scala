@@ -30,7 +30,6 @@ object Server extends Api {
       <head>
         <title>Hydra UI</title>
         <script type="text/javascript" src="/client-fastopt.js"></script>
-        <script type="text/javascript" src="//localhost:12345/workbench.js"></script>
         <script type="text/javascript" src="META-INF/resources/webjars/materialize-css/1.0.0-beta/dist/js/materialize.min.js"></script>
         <link rel="stylesheet" type="text/css" href="META-INF/resources/webjars/materialize-css/1.0.0-beta/dist/css/materialize.min.css"/>
         <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
@@ -84,6 +83,7 @@ object Server extends Api {
 
   val client = new HydraApiClient[IO](Http4sHydraClient)
   // TODO testability is not good, since IO is opaque
+  //TODO replace state monad with a Ref for handling the token as shared mutable state
   var token: AccessToken = AccessToken.empty
   override def getClients(): Future[Either[String, Map[String, Client]]] =
     client.getClients.run(token).unsafeToFuture().map {

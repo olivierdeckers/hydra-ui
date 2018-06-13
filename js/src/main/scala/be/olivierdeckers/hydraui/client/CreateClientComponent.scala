@@ -5,7 +5,7 @@ import java.util.UUID
 import be.olivierdeckers.hydraui.GrantType.AuthorizationCode
 import be.olivierdeckers.hydraui.client.components._
 import com.thoughtworks.binding.{Binding, dom}
-import org.scalajs.dom.{MouseEvent, Node}
+import org.scalajs.dom.{MouseEvent, Node, window}
 import be.olivierdeckers.hydraui.{Api, GrantType, ResponseType, Client => HydraClient}
 import cats.data.Validated.{Invalid, Valid}
 
@@ -14,7 +14,7 @@ object CreateClientComponent extends MainContainer {
   @dom
   def content: Binding[Node] = {
     // To allow materialize css to initialize the multi select boxes
-    org.scalajs.dom.window.setTimeout(() => MaterializeCSS.AutoInit(), 0)
+    window.setTimeout(() => MaterializeCSS.AutoInit(), 0)
 
     val nameField = new InputField("name")
     val urlField = new InputField("url")
