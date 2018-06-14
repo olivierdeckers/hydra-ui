@@ -19,6 +19,7 @@ import ujson.circe.CirceJson
 
 class HydraApiClient[F[_] : Sync](client: HydraClient[F]) extends Http4sClientDsl[F] {
 
+
   import be.olivierdeckers.hydraui.server.config.HydraClientConfig.config._
 
   implicit val clientMapDecoder: EntityDecoder[F, Map[String, Client]] = jsonOf[F, Map[String, Client]]
@@ -43,6 +44,15 @@ class HydraApiClient[F[_] : Sync](client: HydraClient[F]) extends Http4sClientDs
       POST(baseUri / "clients", body)
     )
 
+  def getClient(id: String): StateT[F, AccessToken, Either[Throwable, Client]] =
+    client.securedApiCall[Client](
+      GET(baseUri / "clients" / id)
+    )
+
+  def updateClient(c: Client): StateT[F, AccessToken, Either[Throwable, Client]] =
+    client.securedApiCall[Client](
+      PUT(baseUri / "clients" / c.id.value, c)
+    )
 }
 
 object HydraApiClient {

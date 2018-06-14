@@ -3,6 +3,7 @@
     <title>Hydra UI</title>
     <script type="text/javascript" src="/client-fastopt.js"></script>
     <script type="text/javascript" src="//localhost:12345/workbench.js"></script>
+    <script src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
     <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
@@ -10,6 +11,13 @@
 <body>
 <script>
     Main.main();
+
+    window.Helper = {
+        setSelectValue: function(id, values) {
+            $('#' + id).val(values);
+        }
+    };
+
 </script>
 </body>
 </html>

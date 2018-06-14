@@ -14,19 +14,43 @@ import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 @JSExportTopLevel("Main")
 object Main {
 
-  sealed class Page(val hash: String, val content: MainContainer)
+  sealed trait Page {
+    def component: MainContainer
+  }
 
-  case object Clients extends Page("#clients", ClientListComponent)
+  case object Clients extends Page {
+    override def component = ClientListComponent
+  }
 
-  case object Policies extends Page("#policies", PoliciesComponent)
+  case object Policies extends Page {
+    override def component = PoliciesComponent
+  }
 
-  case object CreateClient extends Page("#create", CreateClientComponent)
+  case object CreateClient extends Page {
+    override def component = CreateClientComponent
+  }
+
+  case class EditClient(id: String) extends Page {
+    override def component = EditClientComponent(id)
+  }
 
   implicit val routeFormat: Route.Format[Page] = new Route.Format[Page] {
-    override def unapply(hashText: String): Option[Page] =
-      Seq(Clients, Policies, CreateClient).find(_.hash == window.location.hash)
+    override def unapply(hashText: String): Option[Page] = {
+      val parts = hashText.drop(1).split("/")
+      parts.headOption.map {
+        case "clients" => Clients
+        case "policies" => Policies
+        case "create" => CreateClient
+        case "edit" => EditClient(parts(1))
+      }
+    }
 
-    override def apply(state: Page): String = state.hash
+    override def apply(state: Page): String = "#" + (state match {
+      case _: Clients.type => "clients"
+      case _: Policies.type => "policies"
+      case _: CreateClient.type => "create"
+      case EditClient(id) => s"edit/$id"
+    })
   }
 
   val route: Route.Hash[Page] = Route.Hash[Page](Clients)(routeFormat)
@@ -38,7 +62,7 @@ object Main {
         <div class="row">
           <div class="col s12">
             <a href="#" class="brand-logo">Hydra UI</a>
-            <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <ul id="nav-mobile" class="right">
               <li>
                 <a href="#clients">Clients</a>
               </li>
@@ -54,7 +78,7 @@ object Main {
       </div>
     </nav>
       <div>
-        {route.state.bind.content.content.bind}
+        {route.state.bind.component.content.bind}
       </div>
   }
 

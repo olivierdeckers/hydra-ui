@@ -6,5 +6,9 @@ import scala.scalajs.js.annotation.JSGlobal
 @js.native
 @JSGlobal("M")
 object MaterializeCSS extends js.Object {
+
   def AutoInit(): Unit = js.native
+
+  def updateTextFields(): Unit = js.native
+
 }
