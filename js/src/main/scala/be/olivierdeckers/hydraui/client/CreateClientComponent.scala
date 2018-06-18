@@ -45,7 +45,8 @@ object CreateClientComponent extends MainContainer {
           Client[Api].createClient(c).call()
             .map {
               case Left(e) => println(e)
-              case _ => // do nothing
+              case _ =>
+                Main.route.state.value = Main.Clients
             }
         case Invalid(e) => println(e)
       }

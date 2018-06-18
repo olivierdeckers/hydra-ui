@@ -1,14 +1,18 @@
 package be.olivierdeckers.hydraui.client
 
-import be.olivierdeckers.hydraui.Policy
+import be.olivierdeckers.hydraui.{Api, Policy}
 import com.thoughtworks.binding.Binding.{Constants, Vars}
 import com.thoughtworks.binding.{Binding, dom}
 import org.scalajs.dom.Node
+import scalajs.concurrent.JSExecutionContext.Implicits.queue
+import autowire._
 
 
 object PoliciesComponent extends MainContainer {
 
   val policies: Vars[Policy] = Vars()
+
+  val client = Client[Api]
 
   @dom
   def multilineText(lines: Seq[String]): Binding[Node] = {
@@ -23,17 +27,25 @@ object PoliciesComponent extends MainContainer {
 
   @dom
   def content: Binding[Node] = {
-    <table class="highlight">
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Resources</th>
-          <th>Actions</th>
-          <th>Subjects</th>
-        </tr>
-      </thead>
-      <tbody>
-        { for (policy <- policies) yield {
+    client.getPolicies().call().map {
+      case Right(policyList) =>
+        policies.value.clear()
+        policies.value ++= policyList
+      case Left(error) => println(s"Error while fetching policies: $error")
+    }
+
+    {
+      <table class="highlight">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Resources</th>
+            <th>Actions</th>
+            <th>Subjects</th>
+          </tr>
+        </thead>
+        <tbody>
+          {for (policy <- policies) yield {
           <tr>
             <td>
               {policy.description}
@@ -49,8 +61,9 @@ object PoliciesComponent extends MainContainer {
             </td>
           </tr>
         }}
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    }
   }
 
 }
