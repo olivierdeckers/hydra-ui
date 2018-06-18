@@ -31,7 +31,8 @@ object PoliciesComponent extends MainContainer {
       case Right(policyList) =>
         policies.value.clear()
         policies.value ++= policyList
-      case Left(error) => println(s"Error while fetching policies: $error")
+      case Left(error) =>
+        MaterializeCSS.toast(s"Error while fetching clients: $error")
     }
 
     {

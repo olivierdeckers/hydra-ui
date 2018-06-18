@@ -20,7 +20,8 @@ object ClientListComponent extends MainContainer {
       case Right(clientMap) =>
         clients.value.clear()
         clients.value ++= clientMap.values
-      case Left(error) => println(s"Error while fetching clients: $error")
+      case Left(error) =>
+        MaterializeCSS.toast(s"Error while fetching clients: $error")
     }
 
     {

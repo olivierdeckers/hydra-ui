@@ -2,16 +2,14 @@ package be.olivierdeckers.hydraui.client.components
 
 import java.util.UUID
 
-import be.olivierdeckers.hydraui.client.MaterializeCSS
+import be.olivierdeckers.hydraui.client.MaterializeCSSNative
 import com.thoughtworks.binding.Binding.Vars
 import com.thoughtworks.binding.{Binding, dom}
-import org.scalajs.dom.Node
 import org.scalajs.dom.html.Select
-import org.scalajs.dom.window
+import org.scalajs.dom.{Node, window}
 
 import scala.scalajs.js
-import js.JSConverters._
-import scala.scalajs.js.annotation.JSGlobal
+import scala.scalajs.js.JSConverters._
 
 
 
@@ -24,7 +22,7 @@ class MultiSelectField(name: String, options: Seq[String], initiallySelected: Se
   def render(): Binding[Node] = {
     window.setTimeout(() => {
       Helper.setSelectValue(id, initiallySelected.toJSArray)
-      MaterializeCSS.AutoInit()
+      MaterializeCSSNative.AutoInit()
     }, 0)
 
     @dom

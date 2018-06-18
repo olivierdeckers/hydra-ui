@@ -19,7 +19,7 @@ case class EditClientComponent(id: String) extends MainContainer {
       case Left(error) => Main.route.state.value = Main.Clients
       case Right(c) =>
         client.value = Some(c)
-        window.setTimeout(() => MaterializeCSS.updateTextFields(), 0)
+        MaterializeCSS.scheduleUpdateTextFields()
     }
 
     val nameField = new InputField("name", client.bind.map(_.client_name.value))
@@ -50,11 +50,14 @@ case class EditClientComponent(id: String) extends MainContainer {
         case Valid(c) =>
           Client[Api].updateClient(c).call()
             .map {
-              case Left(e) => println(e)
+              case Left(e) =>
+                MaterializeCSS.toast(e)
               case _ =>
+                MaterializeCSS.toast(s"Updated client ${c.client_name}")
                 Main.route.state.value = Main.Clients
             }
-        case Invalid(e) => println(e)
+        case Invalid(e) =>
+          MaterializeCSS.toast(e)
       }
     }
 

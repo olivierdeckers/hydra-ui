@@ -14,7 +14,7 @@ object CreateClientComponent extends MainContainer {
   @dom
   def content: Binding[Node] = {
     // To allow materialize css to initialize the multi select boxes
-    window.setTimeout(() => MaterializeCSS.AutoInit(), 0)
+    MaterializeCSS.scheduleAutoInit
 
     val nameField = new InputField("name")
     val urlField = new InputField("url")
@@ -44,11 +44,13 @@ object CreateClientComponent extends MainContainer {
         case Valid(c) =>
           Client[Api].createClient(c).call()
             .map {
-              case Left(e) => println(e)
+              case Left(e) => MaterializeCSS.toast(e)
               case _ =>
+                MaterializeCSS.toast(s"Created client ${c.client_name}")
                 Main.route.state.value = Main.Clients
             }
-        case Invalid(e) => println(e)
+        case Invalid(e) =>
+          MaterializeCSS.toast(e)
       }
       println(client)
     }
