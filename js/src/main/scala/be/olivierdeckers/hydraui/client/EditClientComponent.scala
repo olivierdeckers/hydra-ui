@@ -13,9 +13,11 @@ case class EditClientComponent(id: String) extends MainContainer {
 
   val client: Var[Option[HydraClient]] = Var(None)
 
+  val api = Client[Api]
+
   @dom
   def content: Binding[Node] = {
-    Client[Api].getClient(id).call().foreach {
+    api.getClient(id).call().foreach {
       case Left(error) => Main.route.state.value = Main.Clients
       case Right(c) =>
         client.value = Some(c)
@@ -48,7 +50,7 @@ case class EditClientComponent(id: String) extends MainContainer {
       import autowire._
       updatedClient match {
         case Valid(c) =>
-          Client[Api].updateClient(c).call()
+          api.updateClient(c).call()
             .map {
               case Left(e) =>
                 MaterializeCSS.toast(e)
@@ -59,6 +61,16 @@ case class EditClientComponent(id: String) extends MainContainer {
         case Invalid(e) =>
           MaterializeCSS.toast(e)
       }
+    }
+
+    def onClickDelete = {evt: MouseEvent =>
+      api.deleteClient(id).call().map {
+        case Left(e) =>
+          MaterializeCSS.toast(s"Error deleting client: $e")
+        case Right(_) =>
+          MaterializeCSS.toast(s"Deleted client ${nameField.value}")
+          Main.route.state.value = Main.Clients
+      }.failed.map(e => MaterializeCSS.toast(s"Error deleting client: $e"))
     }
 
     //TODO delete functionality + call
@@ -79,8 +91,12 @@ case class EditClientComponent(id: String) extends MainContainer {
             {publicField.render().bind}
           </form>
 
-          <button class="btn waves-effect waves-light" type="submit" onclick={onClickSubmit}>Submit
+          <button class="btn waves-effect waves-light" onclick={onClickSubmit}>Submit
             <i class="material-icons right">send</i>
+          </button>
+
+          <button class="btn waves-effect waves-light" onclick={onClickDelete}>Delete
+            <i class="material-icons right red">delete</i>
           </button>
 
         </div>

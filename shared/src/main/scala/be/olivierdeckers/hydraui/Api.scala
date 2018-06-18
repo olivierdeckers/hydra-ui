@@ -12,4 +12,6 @@ trait Api {
   def createClient(client: Client): Future[Either[String, Client]]
 
   def updateClient(client: Client): Future[Either[String, Client]]
+
+  def deleteClient(id: String): Future[Either[String, Unit]]
 }

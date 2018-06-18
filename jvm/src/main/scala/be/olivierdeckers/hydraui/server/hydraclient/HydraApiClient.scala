@@ -53,6 +53,11 @@ class HydraApiClient[F[_] : Sync](client: HydraClient[F]) extends Http4sClientDs
     client.securedApiCall[Client](
       PUT(baseUri / "clients" / c.id.value, c)
     )
+
+  def deleteClient(id: String): StateT[F, AccessToken, Either[Throwable, Unit]] =
+    client.securedApiCall[Unit](
+      DELETE(baseUri / "clients" / id)
+    )
 }
 
 object HydraApiClient {

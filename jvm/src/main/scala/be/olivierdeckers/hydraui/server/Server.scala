@@ -119,4 +119,11 @@ object Server extends Api {
         token = newToken
         response.left.map(_.getMessage)
     }
+
+  override def deleteClient(id: String): Future[Either[String, Unit]] =
+    client.deleteClient(id).run(token).unsafeToFuture.map {
+      case (newToken, response) =>
+        token = newToken
+        response.left.map(_.getMessage)
+    }
 }
