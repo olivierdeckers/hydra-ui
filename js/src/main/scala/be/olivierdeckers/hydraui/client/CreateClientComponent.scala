@@ -2,12 +2,12 @@ package be.olivierdeckers.hydraui.client
 
 import java.util.UUID
 
-import be.olivierdeckers.hydraui.GrantType.AuthorizationCode
 import be.olivierdeckers.hydraui.client.components._
-import com.thoughtworks.binding.{Binding, dom}
-import org.scalajs.dom.{MouseEvent, Node, window}
 import be.olivierdeckers.hydraui.{Api, GrantType, ResponseType, Client => HydraClient}
 import cats.data.Validated.{Invalid, Valid}
+import com.thoughtworks.binding.Binding.{BindingSeq, Constants}
+import com.thoughtworks.binding.{Binding, dom}
+import org.scalajs.dom.Node
 
 object CreateClientComponent extends MainContainer {
 
@@ -25,7 +25,7 @@ object CreateClientComponent extends MainContainer {
     val scopeField = new InputField("scope")
     val publicField = new SwitchField("public")
 
-    def onClickSubmit = { evt: MouseEvent =>
+    def onClickSubmit: () => Unit = { () =>
       val client = HydraClient.validate(
         UUID.randomUUID().toString,
         nameField.value,
@@ -38,8 +38,9 @@ object CreateClientComponent extends MainContainer {
         publicField.value
       )
 
-      import scalajs.concurrent.JSExecutionContext.Implicits.queue
       import autowire._
+
+      import scalajs.concurrent.JSExecutionContext.Implicits.queue
       client match {
         case Valid(c) =>
           Client[Api].createClient(c).call()
@@ -52,33 +53,33 @@ object CreateClientComponent extends MainContainer {
         case Invalid(e) =>
           MaterializeCSS.toast(e)
       }
-      println(client)
     }
+
+    val clientForm = new ClientFormComponent(
+      onClickSubmit,
+      Constants(
+        nameField.render().bind,
+        urlField.render().bind,
+        ownerField.render().bind,
+        redirectUriField.render().bind,
+        responseTypesField.render().bind,
+        grantTypesField.render().bind,
+        scopeField.render().bind,
+        publicField.render().bind
+      )
+    )
 
     {
       <div class="row">
         <div class="col s12 m6 offset-m3">
           <h1 class="header">Create client</h1>
-          <form action="#">
-            {nameField.render().bind}
-            {urlField.render().bind}
-            {ownerField.render().bind}
-            {redirectUriField.render().bind}
-            {responseTypesField.render().bind}
-            {grantTypesField.render().bind}
-            {scopeField.render().bind}
-            {publicField.render().bind}
-          </form>
 
-          <button class="btn waves-effect waves-light" type="submit" onclick={onClickSubmit}>Submit
-            <i class="material-icons right">send</i>
-          </button>
+          {clientForm.render.bind}
 
         </div>
       </div>
     }
   }
-
 
 
 }

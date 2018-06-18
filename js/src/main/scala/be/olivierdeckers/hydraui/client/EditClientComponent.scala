@@ -1,13 +1,14 @@
 package be.olivierdeckers.hydraui.client
 
 import autowire._
-import be.olivierdeckers.hydraui.client.components.{InputField, MultiSelectField, SwitchField}
-import com.thoughtworks.binding.{Binding, dom}
-import org.scalajs.dom.{MouseEvent, Node, window}
+import be.olivierdeckers.hydraui.client.components.{ClientFormComponent, InputField, MultiSelectField, SwitchField}
 import be.olivierdeckers.hydraui.{Api, GrantType, ResponseType, Client => HydraClient}
 import cats.data.Validated.{Invalid, Valid}
-import com.thoughtworks.binding.Binding.{SingleMountPoint, Var}
-import scalajs.concurrent.JSExecutionContext.Implicits.queue
+import com.thoughtworks.binding.Binding.{Constants, Var}
+import com.thoughtworks.binding.{Binding, dom}
+import org.scalajs.dom.{MouseEvent, Node}
+
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 case class EditClientComponent(id: String) extends MainContainer {
 
@@ -33,7 +34,7 @@ case class EditClientComponent(id: String) extends MainContainer {
     val scopeField = new InputField("scope", client.bind.map(_.scope))
     val publicField = new SwitchField("public", client.bind.map(_.public))
 
-    def onClickSubmit = { evt: MouseEvent =>
+    def onClickSubmit: () => Unit = { () =>
       val updatedClient = HydraClient.validate(
         id,
         nameField.value,
@@ -46,8 +47,9 @@ case class EditClientComponent(id: String) extends MainContainer {
         publicField.value
       )
 
-      import scalajs.concurrent.JSExecutionContext.Implicits.queue
       import autowire._
+
+      import scalajs.concurrent.JSExecutionContext.Implicits.queue
       updatedClient match {
         case Valid(c) =>
           api.updateClient(c).call()
@@ -63,7 +65,7 @@ case class EditClientComponent(id: String) extends MainContainer {
       }
     }
 
-    def onClickDelete = {evt: MouseEvent =>
+    def onClickDelete = { evt: MouseEvent =>
       api.deleteClient(id).call().map {
         case Left(e) =>
           MaterializeCSS.toast(s"Error deleting client: $e")
@@ -73,27 +75,29 @@ case class EditClientComponent(id: String) extends MainContainer {
       }.failed.map(e => MaterializeCSS.toast(s"Error deleting client: $e"))
     }
 
+    val clientForm = new ClientFormComponent(
+      onClickSubmit,
+      Constants(
+        nameField.render().bind,
+        urlField.render().bind,
+        ownerField.render().bind,
+        redirectUriField.render().bind,
+        responseTypesField.render().bind,
+        grantTypesField.render().bind,
+        scopeField.render().bind,
+        publicField.render().bind
+      )
+    )
+
     //TODO delete functionality + call
     //TODO cleanup code duplication with createclientcomponent
 
     {
       <div class="row">
         <div class="col s12 m6 offset-m3">
-          <h1 class="header">Create client</h1>
-          <form action="#">
-            {nameField.render().bind}
-            {urlField.render().bind}
-            {ownerField.render().bind}
-            {redirectUriField.render().bind}
-            {responseTypesField.render().bind}
-            {grantTypesField.render().bind}
-            {scopeField.render().bind}
-            {publicField.render().bind}
-          </form>
+          <h1 class="header">Edit client</h1>
 
-          <button class="btn waves-effect waves-light" onclick={onClickSubmit}>Submit
-            <i class="material-icons right">send</i>
-          </button>
+          {clientForm.render.bind}
 
           <button class="btn waves-effect waves-light red" onclick={onClickDelete}>Delete
             <i class="material-icons right">delete</i>
