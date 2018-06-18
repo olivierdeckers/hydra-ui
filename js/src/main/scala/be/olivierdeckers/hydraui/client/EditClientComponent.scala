@@ -95,8 +95,8 @@ case class EditClientComponent(id: String) extends MainContainer {
             <i class="material-icons right">send</i>
           </button>
 
-          <button class="btn waves-effect waves-light" onclick={onClickDelete}>Delete
-            <i class="material-icons right red">delete</i>
+          <button class="btn waves-effect waves-light red" onclick={onClickDelete}>Delete
+            <i class="material-icons right">delete</i>
           </button>
 
         </div>

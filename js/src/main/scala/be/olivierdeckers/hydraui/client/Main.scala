@@ -5,7 +5,7 @@ import be.olivierdeckers.hydraui.Api
 import be.olivierdeckers.hydraui.client.ClientListComponent.clients
 import com.thoughtworks.binding.Binding.{BindingSeq, Var}
 import com.thoughtworks.binding.{Binding, Route, dom}
-import org.scalajs.dom.raw.Node
+import org.scalajs.dom.raw.{Event, Node}
 import org.scalajs.dom.window
 
 import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
@@ -57,29 +57,42 @@ object Main {
 
   @dom
   def root(): Binding[BindingSeq[Node]] = {
-    <nav>
-      <div class="nav-wrapper">
-        <div class="row">
-          <div class="col s12">
-            <a href="#" class="brand-logo">Hydra UI</a>
-            <ul id="nav-mobile" class="right">
-              <li>
-                <a href="#clients">Clients</a>
-              </li>
-              <li>
-                <a href="#policies">Policies</a>
-              </li>
-              <li>
-                <a href="#create">Create client</a>
-              </li>
-            </ul>
+    window.setTimeout(() => MaterializeCSSNative.AutoInit(), 0)
+
+    {
+      <nav>
+        <div class="nav-wrapper">
+          <div class="row">
+            <div class="col s12">
+              <a href="#" class="brand-logo">Hydra UI</a>
+              <ul id="nav-mobile" class="right">
+                <li>
+                  <a href="#clients">Clients</a>
+                </li>
+                <li>
+                  <a href="#policies">Policies</a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
-      <div>
-        {route.state.bind.component.content.bind}
-      </div>
+      </nav>
+        <div>
+          {route.state.bind.component.content.bind}<div class="fixed-action-btn">
+          <a class="btn-floating btn-large red tooltipped" onclick={_: Event => route.state.value = CreateClient} data:data-position="left" data:data-tooltip="Create client">
+            <i class="large material-icons">mode_edit</i>
+          </a>
+          <ul>
+            <li>
+              <a class="btn-floating red tooltipped" onclick={_: Event => route.state.value = CreateClient} data:data-position="left" data:data-tooltip="Create policy">
+                <i class="material-icons">event_note</i>
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        </div>
+    }
   }
 
   @JSExport
