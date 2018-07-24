@@ -27,13 +27,10 @@ object PoliciesComponent extends MainContainer {
 
   @dom
   def content: Binding[Node] = {
-    client.getPolicies().call().map {
-      case Right(policyList) =>
-        policies.value.clear()
-        policies.value ++= policyList
-      case Left(error) =>
-        MaterializeCSS.toast(s"Error while fetching clients: $error")
-    }
+    client.getPolicies().call().map(policyList => {
+      policies.value.clear()
+      policies.value ++= policyList
+    }).failed.foreach(error => MaterializeCSS.toast(s"Error while fetching clients: $error"))
 
     {
       <table class="highlight">

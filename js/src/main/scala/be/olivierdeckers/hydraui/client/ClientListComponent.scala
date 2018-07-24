@@ -16,13 +16,10 @@ object ClientListComponent extends MainContainer {
 
   @dom
   def content: Binding[Node] = {
-    client.getClients().call().map {
-      case Right(clientMap) =>
+    client.getClients().call().map(clientMap => {
         clients.value.clear()
         clients.value ++= clientMap.values
-      case Left(error) =>
-        MaterializeCSS.toast(s"Error while fetching clients: $error")
-    }
+    }).failed.foreach(error => MaterializeCSS.toast(s"Error while fetching clients: $error"))
 
     {
       <table class="highlight">

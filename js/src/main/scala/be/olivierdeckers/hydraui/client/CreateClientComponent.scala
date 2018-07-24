@@ -44,12 +44,10 @@ object CreateClientComponent extends MainContainer {
       client match {
         case Valid(c) =>
           Client[Api].createClient(c).call()
-            .map {
-              case Left(e) => MaterializeCSS.toast(e)
-              case _ =>
-                MaterializeCSS.toast(s"Created client ${c.client_name}")
-                Main.route.state.value = Main.Clients
-            }
+            .map(_ => {
+              MaterializeCSS.toast(s"Created client ${c.client_name}")
+              Main.route.state.value = Main.Clients
+            }).failed.foreach(e => MaterializeCSS.toast(e.getMessage))
         case Invalid(e) =>
           MaterializeCSS.toast(e)
       }

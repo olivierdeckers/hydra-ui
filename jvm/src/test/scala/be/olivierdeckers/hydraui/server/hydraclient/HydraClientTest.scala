@@ -2,6 +2,7 @@ package be.olivierdeckers.hydraui.server.hydraclient
 
 import java.time.{Clock, Instant, ZoneId}
 
+import akka.util.Helpers.Requiring
 import be.olivierdeckers.hydraui.HydraTokenResponse
 import cats.Id
 import cats.effect._
@@ -26,13 +27,13 @@ object HydraClientTest extends utest.TestSuite {
   }
 
   val client = new HydraClient[Id] {
-    override def apiCall[A](request: Id[Request[Id]])(implicit ed: EntityDecoder[Id, A]): Id[Either[Throwable, A]] = {
+    override def apiCall[A](request: Id[Request[Id]])(implicit ed: EntityDecoder[Id, A]): Id[A] = {
       val body = fs2.Stream.fromIterator[Id, Byte]("\"test\"".getBytes.iterator)
-      ed.decode(Response(body = body, headers = Headers(Header("Content-Type", "application/json"))), strict = true).value
+      ed.decode(Response(body = body, headers = Headers(Header("Content-Type", "application/json"))), strict = true).value.right.get
     }
 
-    override def getAccessToken: Id[Either[Throwable, HydraTokenResponse]] =
-      Right(HydraTokenResponse("newToken", 3600))
+    override def getAccessToken: Id[HydraTokenResponse] =
+      HydraTokenResponse("newToken", 3600)
 
     override val clock: Clock =
       Clock.fixed(Instant.ofEpochMilli(10), ZoneId.of("UTC"))
@@ -45,14 +46,14 @@ object HydraClientTest extends utest.TestSuite {
       val (token, result) = client.securedApiCall[String](Request())
         .run(AccessToken("token", 1000))
       assert(token.token == "token")
-      assert(result == Right("test"))
+      assert(result == "test")
     }
 
     "should refresh invalid token and perform call" - {
       val (token, result) = client.securedApiCall[String](Request())
         .run(AccessToken("token", 9))
       assert(token.token == "newToken")
-      assert(result == Right("test"))
+      assert(result == "test")
     }
   }
 }

@@ -3,6 +3,7 @@ package be.olivierdeckers.hydraui.server.hydraclient
 import java.util.UUID
 
 import be.olivierdeckers.hydraui.{Client, GrantType, Policy, ResponseType}
+import cats.Applicative
 import cats.data.StateT
 import cats.effect.Sync
 import eu.timepit.refined.api.Refined
@@ -17,7 +18,7 @@ import org.http4s.{EntityDecoder, EntityEncoder}
 import ujson.Js
 import ujson.circe.CirceJson
 
-class HydraApiClient[F[_] : Sync](client: HydraClient[F]) extends Http4sClientDsl[F] {
+class HydraApiClient[F[_]: Sync](client: HydraClient[F]) extends Http4sClientDsl[F] {
 
 
   import be.olivierdeckers.hydraui.server.config.HydraClientConfig.config._
@@ -29,35 +30,29 @@ class HydraApiClient[F[_] : Sync](client: HydraClient[F]) extends Http4sClientDs
   implicit val objDecoder: io.circe.Decoder[Js.Obj] =
     (c: HCursor) => Right(CirceJson.transform(c.value, upickle.default.readwriter[Js.Obj]))
 
-  def getClients: StateT[F, AccessToken, Either[Throwable, Map[String, Client]]] =
-    client.securedApiCall[Map[String, Client]](
-      GET.apply(baseUri / "clients")
-    )
+  def getClients()(implicit F: Applicative[F]): StateT[F, AccessToken, Map[String, Client]] =
+    StateT.liftF(GET(baseUri / "clients"))
+      .flatMap(client.securedApiCall[Map[String, Client]])
 
-  def getPolicies: StateT[F, AccessToken, Either[Throwable, Seq[Policy]]] =
-    client.securedApiCall[Seq[Policy]](
-      GET(baseUri / "policies")
-    )
+  def getPolicies: StateT[F, AccessToken, Seq[Policy]] =
+    StateT.liftF(GET(baseUri / "policies"))
+      .flatMap(client.securedApiCall[Seq[Policy]])
 
-  def createClient(body: Client): StateT[F, AccessToken, Either[Throwable, Client]] =
-    client.securedApiCall[Client](
-      POST(baseUri / "clients", body)
-    )
+  def createClient(body: Client): StateT[F, AccessToken, Client] =
+    StateT.liftF(POST(baseUri / "clients", body))
+      .flatMap(client.securedApiCall[Client])
 
-  def getClient(id: String): StateT[F, AccessToken, Either[Throwable, Client]] =
-    client.securedApiCall[Client](
-      GET(baseUri / "clients" / id)
-    )
+  def getClient(id: String): StateT[F, AccessToken, Client] =
+    StateT.liftF(GET(baseUri / "clients" / id))
+      .flatMap(client.securedApiCall[Client])
 
-  def updateClient(c: Client): StateT[F, AccessToken, Either[Throwable, Client]] =
-    client.securedApiCall[Client](
-      PUT(baseUri / "clients" / c.id.value, c)
-    )
+  def updateClient(c: Client): StateT[F, AccessToken, Client] =
+    StateT.liftF(PUT(baseUri / "clients" / c.id.value, c))
+      .flatMap(client.securedApiCall[Client])
 
-  def deleteClient(id: String): StateT[F, AccessToken, Either[Throwable, Unit]] =
-    client.securedApiCall[Unit](
-      DELETE(baseUri / "clients" / id)
-    )
+  def deleteClient(id: String): StateT[F, AccessToken, Unit] =
+    StateT.liftF(DELETE(baseUri / "clients" / id))
+      .flatMap(client.securedApiCall[Unit])
 }
 
 object HydraApiClient {
@@ -68,6 +63,6 @@ object HydraApiClient {
       .run(AccessToken.empty).unsafeRunSync()
     val result = client.getClients.run(AccessToken.empty).unsafeRunSync()
     //    val result = getAccessToken.compile.last.unsafeRunSync()
-    println(result._2.right.get.mkString("\n"))
+    println(result._2.mkString("\n"))
   }
 }

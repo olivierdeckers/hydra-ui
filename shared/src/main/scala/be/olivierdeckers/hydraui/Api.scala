@@ -3,15 +3,15 @@ package be.olivierdeckers.hydraui
 import scala.concurrent.Future
 
 trait Api {
-  def getClients(): Future[Either[String,Map[String, Client]]]
+  def getClients(): Future[Map[String, Client]]
 
-  def getClient(id: String): Future[Either[String, Client]]
+  def getClient(id: String): Future[Client]
 
-  def getPolicies(): Future[Either[String,Seq[Policy]]]
+  def getPolicies(): Future[Seq[Policy]]
 
-  def createClient(client: Client): Future[Either[String, Client]]
+  def createClient(client: Client): Future[Client]
 
-  def updateClient(client: Client): Future[Either[String, Client]]
+  def updateClient(client: Client): Future[Client]
 
-  def deleteClient(id: String): Future[Either[String, Unit]]
+  def deleteClient(id: String): Future[Unit]
 }

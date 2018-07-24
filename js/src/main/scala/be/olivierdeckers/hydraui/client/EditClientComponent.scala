@@ -18,12 +18,10 @@ case class EditClientComponent(id: String) extends MainContainer {
 
   @dom
   def content: Binding[Node] = {
-    api.getClient(id).call().foreach {
-      case Left(error) => Main.route.state.value = Main.Clients
-      case Right(c) =>
+    api.getClient(id).call().map(c => {
         client.value = Some(c)
         MaterializeCSS.scheduleUpdateTextFields()
-    }
+    }).failed.foreach(_ => Main.route.state.value = Main.Clients)
 
     val nameField = new InputField("name", client.bind.map(_.client_name.value))
     val urlField = new InputField("url", client.bind.map(_.client_uri.value))
@@ -53,26 +51,20 @@ case class EditClientComponent(id: String) extends MainContainer {
       updatedClient match {
         case Valid(c) =>
           api.updateClient(c).call()
-            .map {
-              case Left(e) =>
-                MaterializeCSS.toast(e)
-              case _ =>
-                MaterializeCSS.toast(s"Updated client ${c.client_name}")
-                Main.route.state.value = Main.Clients
-            }
+            .map(_ => {
+              MaterializeCSS.toast(s"Updated client ${c.client_name}")
+              Main.route.state.value = Main.Clients
+            }).failed.foreach(e => MaterializeCSS.toast(e.toString))
         case Invalid(e) =>
           MaterializeCSS.toast(e)
       }
     }
 
     def onClickDelete = { evt: MouseEvent =>
-      api.deleteClient(id).call().map {
-        case Left(e) =>
-          MaterializeCSS.toast(s"Error deleting client: $e")
-        case Right(_) =>
-          MaterializeCSS.toast(s"Deleted client ${nameField.value}")
-          Main.route.state.value = Main.Clients
-      }.failed.map(e => MaterializeCSS.toast(s"Error deleting client: $e"))
+      api.deleteClient(id).call().map(_ => {
+        MaterializeCSS.toast(s"Deleted client ${nameField.value}")
+        Main.route.state.value = Main.Clients
+      }).failed.foreach(e => MaterializeCSS.toast(s"Error deleting client: $e"))
     }
 
     val clientForm = new ClientFormComponent(

@@ -85,45 +85,45 @@ object Server extends Api {
   // TODO testability is not good, since IO is opaque
   //TODO replace state monad with a Ref for handling the token as shared mutable state
   var token: AccessToken = AccessToken.empty
-  override def getClients(): Future[Either[String, Map[String, Client]]] =
+  override def getClients(): Future[Map[String, Client]] =
     client.getClients.run(token).unsafeToFuture().map {
       case (newToken, response) =>
         token = newToken
-        response.left.map(_.getMessage)
+        response
     }
 
-  override def getPolicies(): Future[Either[String, Seq[Policy]]] =
+  override def getPolicies(): Future[Seq[Policy]] =
     client.getPolicies.run(token).unsafeToFuture().map {
       case (newToken, response) =>
         token = newToken
-        response.left.map(_.getMessage)
+        response
     }
 
-  override def createClient(body: Client): Future[Either[String, Client]] =
+  override def createClient(body: Client): Future[Client] =
     client.createClient(body).run(token).unsafeToFuture().map {
       case (newToken, response) =>
         token = newToken
-        response.left.map(_.getMessage)
+        response
     }
 
-  override def getClient(id: String): Future[Either[String, Client]] =
+  override def getClient(id: String): Future[Client] =
     client.getClient(id).run(token).unsafeToFuture().map {
       case (newToken, response) =>
         token = newToken
-        response.left.map(_.getMessage)
+        response
     }
 
-  override def updateClient(c: Client): Future[Either[String, Client]] =
+  override def updateClient(c: Client): Future[Client] =
     client.updateClient(c).run(token).unsafeToFuture.map {
       case (newToken, response) =>
         token = newToken
-        response.left.map(_.getMessage)
+        response
     }
 
-  override def deleteClient(id: String): Future[Either[String, Unit]] =
+  override def deleteClient(id: String): Future[Unit] =
     client.deleteClient(id).run(token).unsafeToFuture.map {
       case (newToken, response) =>
         token = newToken
-        response.left.map(_.getMessage)
+        response
     }
 }
